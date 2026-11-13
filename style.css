@@ -526,6 +526,138 @@ input[type="radio"]#p4:checked + .priority-btn { background-color: var(--p4-colo
 }
 
 /* ==========================================================================
+   Monthly History
+   ========================================================================== */
+
+.month-history {
+    padding: 20px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.month-history-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.month-history-heading h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.month-history-heading p,
+.month-history-hint {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-sub);
+}
+
+.month-history-heading .history-summary {
+    flex-shrink: 0;
+    color: var(--text-main);
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    background-color: var(--primary-glow);
+}
+
+.month-history-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.month-select-field {
+    flex: 1 1 180px;
+    min-width: 0;
+}
+
+.month-select-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-sub);
+    margin-bottom: 7px;
+}
+
+#monthSelect {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    color: var(--text-main);
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    cursor: pointer;
+    color-scheme: light;
+}
+
+[data-theme="dark"] #monthSelect {
+    color-scheme: dark;
+}
+
+.month-navigation {
+    display: flex;
+    gap: 8px;
+}
+
+.month-nav-btn {
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 12px;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.month-nav-btn i,
+.month-nav-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.month-nav-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background-color: var(--primary-glow);
+}
+
+.month-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.current-month-btn {
+    border-color: var(--primary);
+    background-color: var(--primary-glow);
+}
+
+#monthSelect:focus-visible,
+.month-nav-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+.month-history-hint {
+    margin-top: 12px;
+}
+
+/* ==========================================================================
    Search & Filter Controls
    ========================================================================== */
 
@@ -1005,6 +1137,29 @@ input[type="radio"]#p4:checked + .priority-btn { background-color: var(--p4-colo
 
 /* Mobile View (Under 576px) */
 @media (max-width: 576px) {
+    .month-history {
+        padding: 16px;
+    }
+
+    .month-history-heading {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .month-select-field,
+    .month-navigation {
+        flex-basis: 100%;
+    }
+
+    .month-navigation {
+        gap: 6px;
+    }
+
+    .month-nav-btn {
+        flex: 1;
+        padding: 0 6px;
+    }
+
     .content-header {
         flex-direction: column;
         align-items: flex-start;
@@ -1036,4 +1191,58 @@ input[type="radio"]#p4:checked + .priority-btn { background-color: var(--p4-colo
     .submit-btn {
         justify-content: center;
     }
+}
+
+/* ==========================================================================
+   Entry kinds (할 일 / 수업 후기 / 기록) and date-by-date history
+   ========================================================================== */
+.kind-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.kind-selector input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+.kind-btn {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px 14px;
+    border: 1px solid var(--border-color); border-radius: var(--radius-full);
+    background: var(--bg-input); color: var(--text-sub); font-size: 14px; font-weight: 500; cursor: pointer;
+    white-space: nowrap; transition: var(--transition-fast);
+}
+.kind-btn svg, .kind-btn i { width: 16px; height: 16px; }
+.kind-selector input:checked + .kind-btn { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+.kind-selector input:focus-visible + .kind-btn { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+.kind-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: var(--primary); flex-shrink: 0; }
+.kind-icon svg { width: 20px; height: 20px; }
+.kind-badge {
+    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: var(--radius-full);
+    font-size: 11px; font-weight: 600; margin-right: 6px; white-space: nowrap;
+    background: var(--p4-bg); color: var(--text-sub);
+}
+.kind-badge.kind-lesson { background: var(--p3-bg); color: var(--p3-color); }
+.kind-badge.kind-note { background: var(--p2-bg); color: var(--primary-hover); }
+.kind-badge.kind-todo { background: var(--p4-bg); color: var(--text-sub); }
+.todo-card.kind-lesson .todo-desc-text, .todo-card.kind-note .todo-desc-text { white-space: pre-line; }
+
+.todo-grid.timeline-view { display: block; }
+.timeline-day { margin-bottom: 22px; }
+.timeline-date {
+    font-family: var(--font-title); font-size: 15px; font-weight: 700; color: var(--text-main);
+    display: flex; align-items: baseline; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);
+}
+.timeline-date span { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.timeline-list { list-style: none; margin: 0; padding: 0; }
+.timeline-item { display: flex; gap: 10px; padding: 12px 2px; border-bottom: 1px solid var(--border-card); }
+.timeline-icon { color: var(--primary); flex-shrink: 0; padding-top: 2px; }
+.timeline-icon svg { width: 18px; height: 18px; }
+.timeline-item.kind-lesson .timeline-icon { color: var(--p3-color); }
+.timeline-body { min-width: 0; }
+.timeline-title { font-size: 15px; font-weight: 600; color: var(--text-main); overflow-wrap: anywhere; line-height: 1.5; }
+.timeline-desc { font-size: 13px; color: var(--text-sub); white-space: pre-line; overflow-wrap: anywhere; margin-top: 4px; line-height: 1.6; }
+.timeline-note { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+.export-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
+.export-row .month-history-hint { flex: 1; min-width: 200px; margin: 0; }
+.export-btn { gap: 6px; }
+
+@media (max-width: 576px) {
+    .kind-selector { gap: 6px; }
+    .kind-btn { flex: 1 1 0; min-width: 0; justify-content: center; padding: 8px 6px; font-size: 13px; gap: 4px; }
+    .export-btn { width: 100%; justify-content: center; }
 }

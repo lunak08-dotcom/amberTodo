@@ -14,7 +14,12 @@
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="cloud-panel.css">
     <!-- JS Logic -->
+    <script src="vendor/supabase.js" defer></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="cloud-store.js" defer></script>
+    <script src="cloud-panel.js" defer></script>
     <script src="app.js" defer></script>
 </head>
 <body>
@@ -35,7 +40,7 @@
             <!-- Progress Dashboard (Todoist Karma Style) -->
             <div class="karma-dashboard">
                 <div class="karma-header">
-                    <span class="karma-title">오늘의 달성률</span>
+                    <span class="karma-title">할 일 달성률</span>
                     <span class="karma-percent" id="karmaPercent">0%</span>
                 </div>
                 <div class="karma-progress-container">
@@ -53,18 +58,39 @@
                             <span class="count-badge" id="countAll">0</span>
                         </a>
                     </li>
+                    <li class="nav-item" data-filter="timeline">
+                        <a href="#" class="nav-link">
+                            <i data-lucide="calendar-check"></i>
+                            <span>날짜별 기록</span>
+                            <span class="count-badge" id="countTimeline">0</span>
+                        </a>
+                    </li>
                     <li class="nav-item" data-filter="active">
                         <a href="#" class="nav-link">
                             <i data-lucide="calendar"></i>
-                            <span>진행 중</span>
+                            <span>진행 중인 할 일</span>
                             <span class="count-badge" id="countActive">0</span>
                         </a>
                     </li>
                     <li class="nav-item" data-filter="completed">
                         <a href="#" class="nav-link">
                             <i data-lucide="check-circle-2"></i>
-                            <span>완료됨</span>
+                            <span>완료한 할 일</span>
                             <span class="count-badge" id="countCompleted">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-filter="lesson">
+                        <a href="#" class="nav-link">
+                            <i data-lucide="graduation-cap"></i>
+                            <span>수업 후기</span>
+                            <span class="count-badge" id="countLesson">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-filter="note">
+                        <a href="#" class="nav-link">
+                            <i data-lucide="notebook-pen"></i>
+                            <span>기록</span>
+                            <span class="count-badge" id="countNote">0</span>
                         </a>
                     </li>
                 </ul>
@@ -97,9 +123,46 @@
                     </div>
                 </header>
 
+                <section class="account-panel" id="accountPanel" aria-labelledby="accountHeading">
+                    <div class="account-heading">
+                        <h3 id="accountHeading">나만의 메모 보관함</h3>
+                        <button type="button" id="logoutButton" class="account-button" hidden>로그아웃</button>
+                    </div>
+                    <p id="accountIdentity" hidden></p>
+                    <p id="accountStatus" role="status" aria-live="polite">로그인 상태를 확인하고 있습니다…</p>
+                    <form id="loginForm" class="login-form" hidden>
+                        <div class="login-field">
+                            <label for="loginEmail">이메일</label>
+                            <input id="loginEmail" type="email" autocomplete="username" required>
+                        </div>
+                        <button id="linkButton" type="submit" class="account-button account-primary">로그인 링크 받기</button>
+                        <details class="password-login">
+                            <summary>비밀번호로 로그인</summary>
+                            <div class="login-field">
+                                <label for="loginPassword">비밀번호</label>
+                                <input id="loginPassword" type="password" autocomplete="current-password">
+                            </div>
+                            <button id="loginButton" type="button" class="account-button">비밀번호로 로그인</button>
+                        </details>
+                    </form>
+                    <button id="retryLoad" type="button" class="account-button" hidden>다시 불러오기</button>
+                    <div id="legacyImport" class="legacy-import" hidden>
+                        <p>이 브라우저에 있던 메모를 내 계정으로 가져옵니다. 기존 원본은 보관됩니다.</p>
+                        <button id="importLegacyButton" type="button" class="account-button">기존 메모 가져오기</button>
+                    </div>
+                </section>
+
                 <!-- Memo Creation Card -->
-                <section class="memo-input-section">
+                <section class="memo-input-section private-content" hidden>
                     <form id="todoForm" class="todo-form">
+                        <div class="kind-selector" role="radiogroup" aria-label="기록 종류">
+                            <input type="radio" name="kind" id="kindTodo" value="todo" checked>
+                            <label for="kindTodo" class="kind-btn"><i data-lucide="check-square" aria-hidden="true"></i>할 일</label>
+                            <input type="radio" name="kind" id="kindLesson" value="lesson">
+                            <label for="kindLesson" class="kind-btn"><i data-lucide="graduation-cap" aria-hidden="true"></i>수업 후기</label>
+                            <input type="radio" name="kind" id="kindNote" value="note">
+                            <label for="kindNote" class="kind-btn"><i data-lucide="notebook-pen" aria-hidden="true"></i>기록</label>
+                        </div>
                         <div class="input-group">
                             <input type="text" id="todoTitle" class="todo-input-title" placeholder="무엇을 해야 하나요?" required autocomplete="off">
                         </div>
@@ -107,7 +170,7 @@
                             <textarea id="todoDesc" class="todo-input-desc" placeholder="메모 및 상세 내용을 추가해 보세요... (선택 사항)"></textarea>
                         </div>
                         <div class="form-actions">
-                            <div class="priority-selector">
+                            <div class="priority-selector" id="prioritySelector">
                                 <label for="todoPriority">우선순위</label>
                                 <div class="priority-options">
                                     <input type="radio" name="priority" id="p1" value="p1">
@@ -131,8 +194,43 @@
                     </form>
                 </section>
 
+                <!-- Monthly History -->
+                <section class="month-history private-content" aria-labelledby="monthHistoryTitle" hidden>
+                    <div class="month-history-heading">
+                        <div>
+                            <h3 id="monthHistoryTitle">월별 메모 기록</h3>
+                            <p>작성한 달을 기준으로 지난 메모를 찾아보세요. "날짜별 기록"에서는 할 일을 <strong>완료한 날</strong> 기준으로 보여 줍니다.</p>
+                        </div>
+                        <p id="historySummary" class="history-summary" role="status" aria-live="polite">전체 기간 · 0개</p>
+                    </div>
+                    <div class="month-history-controls">
+                        <div class="month-select-field">
+                            <label for="monthSelect">작성 월</label>
+                            <select id="monthSelect" aria-describedby="monthHistoryHint">
+                                <option value="all">전체 기간</option>
+                            </select>
+                        </div>
+                        <div class="month-navigation" role="group" aria-label="작성 월 이동">
+                            <button type="button" id="previousMonth" class="month-nav-btn" aria-label="이전 달 메모 보기" disabled>
+                                <i data-lucide="chevron-left" aria-hidden="true"></i><span>이전 달</span>
+                            </button>
+                            <button type="button" id="nextMonth" class="month-nav-btn" aria-label="다음 달 메모 보기" disabled>
+                                <span>다음 달</span><i data-lucide="chevron-right" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" id="currentMonth" class="month-nav-btn current-month-btn">이번 달</button>
+                        </div>
+                    </div>
+                    <p id="monthHistoryHint" class="month-history-hint">전체 기간을 선택하면 모든 달의 메모를 함께 볼 수 있어요.</p>
+                    <div class="export-row">
+                        <button type="button" id="exportMarkdown" class="month-nav-btn export-btn">
+                            <i data-lucide="download" aria-hidden="true"></i><span>이 기간 기록을 마크다운(.md)으로 내보내기</span>
+                        </button>
+                        <p class="month-history-hint">완료한 할 일·수업 후기·기록을 날짜순으로 묶어 옵시디언에 넣을 수 있는 파일로 저장합니다.</p>
+                    </div>
+                </section>
+
                 <!-- Search & Filter Controls -->
-                <section class="controls-section">
+                <section class="controls-section private-content" hidden>
                     <div class="search-bar-wrapper">
                         <i data-lucide="search" class="search-icon"></i>
                         <input type="text" id="searchInput" placeholder="메모 검색하기...">
@@ -149,7 +247,7 @@
                 </section>
 
                 <!-- Todo List Area -->
-                <section class="todo-list-section">
+                <section class="todo-list-section private-content" hidden>
                     <div class="todo-grid" id="todoGrid">
                         <!-- Todo Cards will be dynamically inserted here -->
                     </div>
